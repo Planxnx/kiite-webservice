@@ -1,2 +1,2 @@
-# kiite-messagingplatform
-kiite-messagingplatform (in devlopment)
+# Kiite-messagingplatform [Webservice]
+## Kiite is anonymous messaging platform for discuss everything issues!

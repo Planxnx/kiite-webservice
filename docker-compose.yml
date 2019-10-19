@@ -1,0 +1,10 @@
+version: '3.5'
+services:
+  kiite-db:
+    image: mongo:4.0.13-xenial
+    container_name: kiite-db
+    volumes: 
+      - './data/db'
+    ports: 
+      - "27017:27017"
+

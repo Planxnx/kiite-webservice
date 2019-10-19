@@ -1,0 +1,36 @@
+{
+  "name": "kiite-messagingplatform",
+  "version": "0.0.1",
+  "description": "kiite-messagingplatform (in devlopment)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "dev": "nodemon index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Planxnx/kiite-messagingplatform.git"
+  },
+  "author": "Thanee Charattrakool",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Planxnx/kiite-messagingplatform/issues"
+  },
+  "homepage": "https://github.com/Planxnx/kiite-messagingplatform#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "install": "^0.13.0",
+    "jwt-simple": "^0.5.6",
+    "mongoose": "^5.7.5",
+    "morgan": "^1.9.1",
+    "nodemon": "^1.19.4",
+    "npm": "^6.12.0",
+    "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0"
+  }
+}
