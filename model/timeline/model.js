@@ -6,6 +6,9 @@ const schema = new Schema({
         type: String,
         required: true
     },
+    mood:{
+        type: String
+    },
     createdBy: {
         type: String,
         required: true

@@ -6,6 +6,9 @@ const JWTAuthMiddleware = require('../middleware/jwtAuth')
 const timelineService = require('./../model/timeline/service')
 
 router.get('/', JWTAuthMiddleware.userAuth, (req, res, next) => {
+
+    //ขาด Overall Sentiment Static
+
     timelineService.getAll().then((data) => {
         res.json({
             status: 200,
@@ -36,6 +39,9 @@ router.get('/all', JWTAuthMiddleware.adminAuth, (req, res, next) => {
 });
 
 router.post('/', JWTAuthMiddleware.userAuth, (req, res, next) => {
+    //
+    //  ขาดทำ Predict แล้ว save ลง DB
+    //
     timelineService.create({
         text: req.body.text,
         createdBy: req.body.username
