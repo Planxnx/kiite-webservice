@@ -4,9 +4,9 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 const config = require('./config.json')
 var http = require('http').Server(app);
-const io = require('socket.io')(http, {
+const io = require('./socket').listen(http,{
     origins: '*:*'
-});
+})
 
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
@@ -27,14 +27,6 @@ app.use('/auth', authRouter);
 app.use('/timeline', timelineRouter);
 
 app.io = io
-
-io.on('connection', (socket) => {
-    console.log("connected : " + socket.id);
-
-    socket.on('disconnect',  () => {
-        console.log("disconnected : " + socket.id);
-    });
-})
 
 http.listen(port, function () {
     console.log(`Application is running on ${port}`)
