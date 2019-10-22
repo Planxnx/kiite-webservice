@@ -25,11 +25,12 @@ const getRandomInt = (max) => {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
-module.exports.listen = (app, conf) => {
-    io = socketio.listen(app, conf)
+module.exports.listen = (app, opt) => {
+    io = socketio.listen(app, opt)
 
     io.on('connection', (socket) => {
         console.log(`connected : ${socket.id}`);
+
         socket.emit('queue_chat', {
             'userQueue': userQueue.length,
             'helperQueue': helperQueue.length
@@ -72,7 +73,7 @@ module.exports.listen = (app, conf) => {
                 case "user":
                     if (helperQueue.length != 0) {
                         let matcher = helperQueue.shift(); //ดึง sokcet ออกมาจาก array
-                        let room = data.id + '#' + matcher.id;
+                        let room = socket.id + '#' + matcher.id;
 
                         matcher.join(room);
                         socket.join(room);
@@ -118,7 +119,7 @@ module.exports.listen = (app, conf) => {
                 case "helper":
                     if (userQueue.length != 0) {
                         let matcher = userQueue.shift(); //ดึง sokcet ออกมาจาก array
-                        let room = data.id + '#' + matcher.id;
+                        let room = socket.id + '#' + matcher.id;
 
                         matcher.join(room);
                         socket.join(room);

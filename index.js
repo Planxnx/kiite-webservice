@@ -11,6 +11,7 @@ const io = require('./socket').listen(http,{
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const timelineRouter = require('./routes/timeline');
+const messageRouter = require('./routes/message');
 
 
 const port = process.env.PORT || config.PORT || 8080;
@@ -25,6 +26,8 @@ app.use(bodyParser.urlencoded({
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/timeline', timelineRouter);
+app.use('/message', messageRouter)
+
 
 app.io = io
 
