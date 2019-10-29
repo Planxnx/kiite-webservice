@@ -10,8 +10,7 @@ const schema = new Schema({
         type: String
     },
     createdBy: {
-        type: String,
-        required: true
+        type: String
     },
     createdDate: {
         type: Date,

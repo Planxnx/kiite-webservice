@@ -41,7 +41,7 @@ router.get('/all', JWTAuthMiddleware.adminAuth, (req, res, next) => {
 router.post('/', JWTAuthMiddleware.userAuth, (req, res, next) => {
     //
     //  ขาดทำ Predict แล้ว save ลง DB
-    //
+    //    
     timelineService.create({
         text: req.body.text,
         createdBy: req.body.username
