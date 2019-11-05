@@ -22,8 +22,21 @@ const nameOfUser = [
     'น้องจู๋'
 ]
 
+const findStat = async (username,matchername, topic) => {
+    let userData = await userService.getByUsername(username)
+    let matcherData = await userService.getByUsername(matchername)
+    return {
+        userStat:userData["stat"][topic],
+        matcherStat:matcherData["stat"][topic]
+    }
+}
+
 const getRandomInt = (max) => {
     return Math.floor(Math.random() * Math.floor(max));
+}
+
+const findMatcher = () => {
+    //...//
 }
 
 module.exports.listen = (app, opt) => {
@@ -74,7 +87,8 @@ module.exports.listen = (app, opt) => {
                 case "user":
                     if (helperQueue.length != 0) {
                         let matcher = helperQueue.find(x => x.topic === data.topic)
-                        // let matcher = helperQueue.shift(); //ดึง sokcet ออกมาจาก array
+                        let index = helperQueue.indexOf(matcher)
+                        helperQueue.splice(index, 1)
                         let room = `#${data.topic}${socket.id}${matcher.id}`;
 
                         matcher.join(room);
@@ -82,17 +96,7 @@ module.exports.listen = (app, opt) => {
 
                         let userPName = nameOfUser[getRandomInt(nameOfUser.length)]
                         let helperPName = nameOfHelper[getRandomInt(nameOfHelper.length)]
-                        let username = ""
-                        let helpername = ""
-                        //ดึงค่า stat ไปให้อีกคน
-                        userService.getByUsername(data.username).then(userData=>{
-                            console.log(userData);                            //ตอนนี้่เป็น null อยุ่
-                            // for ( let property in userData.stat ) {
-                            //     if(property == data.topic){
-                            //         console.log( property ); 
-                            //     }
-                            // }
-                        })
+
                         chatRoom.push({
                             helperName: helperPName,
                             helperID: matcher.id,
@@ -101,18 +105,23 @@ module.exports.listen = (app, opt) => {
                             room: room
                         })
 
-                        matcher.emit('found_chat', {
-                            matchName: userPName,
-                            yourName: helperPName,
-                            room: room,
-                            topic:data.topic
-                        });
-                        socket.emit('found_chat', {
-                            matchName: helperPName,
-                            yourName: userPName,
-                            room: room,
-                            topic:data.topic
-                        });
+                        findStat(data.username,matcher.username,data.topic).then(dataStat=>{
+                            matcher.emit('found_chat', {
+                                matchName: userPName,
+                                yourName: helperPName,
+                                room: room,
+                                topic: data.topic,
+                                matcherStat: dataStat.userStat
+                            });
+                            socket.emit('found_chat', {
+                                matchName: helperPName,
+                                yourName: userPName,
+                                room: room,
+                                topic: data.topic,
+                                matcherStat: dataStat.matcherStat
+                            });
+                        })
+                        
                         io.emit('queue_chat', {
                             'userQueue': userQueue.length,
                             'helperQueue': helperQueue.length
@@ -135,36 +144,42 @@ module.exports.listen = (app, opt) => {
                     break;
                 case "helper":
                     if (userQueue.length != 0) {
-                        let matcher = userQueue.find(x => x.topic === data.topic)                        
-                        // let matcher = userQueue.shift(); //ดึง sokcet ออกมาจาก array
+                        let matcher = userQueue.find(x => x.topic === data.topic)
+                        let index = userQueue.indexOf(matcher)
+                        userQueue.splice(index, 1)
                         let room = `#${data.topic}${socket.id}${matcher.id}`;
                         // let room = socket.id + '#' + matcher.id;
 
                         matcher.join(room);
                         socket.join(room);
-                        let userName = nameOfUser[getRandomInt(nameOfUser.length)]
-                        let helperName = nameOfHelper[getRandomInt(nameOfHelper.length)]
+                        let userPName = nameOfUser[getRandomInt(nameOfUser.length)]
+                        let helperPName = nameOfHelper[getRandomInt(nameOfHelper.length)]
 
                         chatRoom.push({
-                            helperName: helperName,
+                            helperName: helperPName,
                             helperID: socket.id,
-                            userName: userName,
+                            userName: userPName,
                             userID: matcher.id,
                             room: room
                         })
 
-                        matcher.emit('found_chat', {
-                            matchName: helperName,
-                            yourName: userName,
-                            room: room,
-                            topic:data.topic
-                        });
-                        socket.emit('found_chat', {
-                            matchName: userName,
-                            yourName: helperName,
-                            room: room,
-                            topic:data.topic
-                        });
+                        findStat(data.username,matcher.username,data.topic).then(dataStat=>{
+                            matcher.emit('found_chat', {
+                                matchName: helperPName,
+                                yourName: userPName,
+                                room: room,
+                                topic: data.topic,
+                                matcherStat: dataStat.userStat
+                            });
+                            socket.emit('found_chat', {
+                                matchName: userPName,
+                                yourName: helperPName,
+                                room: room,
+                                topic: data.topic,
+                                matcherStat: dataStat.matcherStat
+                            });
+                        })
+                        
                         io.emit('queue_chat', {
                             'userQueue': userQueue.length,
                             'helperQueue': helperQueue.length
