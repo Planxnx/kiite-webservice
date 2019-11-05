@@ -1,4 +1,5 @@
 const socketio = require('socket.io')
+const userService = require('./model/user/service')
 
 let helperQueue = []
 let userQueue = []
@@ -52,9 +53,9 @@ module.exports.listen = (app, opt) => {
                 socket.to(helperObj.room).emit('end_chat', "Helper disconnected")
                 let index = chatRoom.indexOf(helperObj)
                 chatRoom.splice(index, 1)
-            } else if (userObj){
+            } else if (userObj) {
                 console.log("#User disconnected");
-                socket.to(userObj.room).emit('end_chat',"User disconnected")
+                socket.to(userObj.room).emit('end_chat', "User disconnected")
                 let index = chatRoom.indexOf(userObj)
                 chatRoom.splice(index, 1)
             }
@@ -72,32 +73,45 @@ module.exports.listen = (app, opt) => {
             switch (data.type) {
                 case "user":
                     if (helperQueue.length != 0) {
-                        let matcher = helperQueue.shift(); //ดึง sokcet ออกมาจาก array
-                        let room = socket.id + '#' + matcher.id;
+                        let matcher = helperQueue.find(x => x.topic === data.topic)
+                        // let matcher = helperQueue.shift(); //ดึง sokcet ออกมาจาก array
+                        let room = `#${data.topic}${socket.id}${matcher.id}`;
 
                         matcher.join(room);
                         socket.join(room);
 
-                        let userName = nameOfUser[getRandomInt(nameOfUser.length)]
-                        let helperName = nameOfHelper[getRandomInt(nameOfHelper.length)]
-
+                        let userPName = nameOfUser[getRandomInt(nameOfUser.length)]
+                        let helperPName = nameOfHelper[getRandomInt(nameOfHelper.length)]
+                        let username = ""
+                        let helpername = ""
+                        //ดึงค่า stat ไปให้อีกคน
+                        userService.getByUsername(data.username).then(userData=>{
+                            console.log(userData);                            //ตอนนี้่เป็น null อยุ่
+                            // for ( let property in userData.stat ) {
+                            //     if(property == data.topic){
+                            //         console.log( property ); 
+                            //     }
+                            // }
+                        })
                         chatRoom.push({
-                            helperName: helperName,
-                            helperID: matcher.id ,
-                            userName: userName,
+                            helperName: helperPName,
+                            helperID: matcher.id,
+                            userName: userPName,
                             userSocket: socket.id,
                             room: room
                         })
 
                         matcher.emit('found_chat', {
-                            matchName: userName,
-                            yourName: helperName,
-                            room: room
+                            matchName: userPName,
+                            yourName: helperPName,
+                            room: room,
+                            topic:data.topic
                         });
                         socket.emit('found_chat', {
-                            matchName: helperName,
-                            yourName: userName,
-                            room: room
+                            matchName: helperPName,
+                            yourName: userPName,
+                            room: room,
+                            topic:data.topic
                         });
                         io.emit('queue_chat', {
                             'userQueue': userQueue.length,
@@ -107,7 +121,10 @@ module.exports.listen = (app, opt) => {
                         console.log("helper:" + helperQueue.length)
                         console.log("user:" + userQueue.length)
                     } else {
-                        userQueue.push(socket);
+                        let socketUser = socket
+                        socketUser.topic = data.topic
+                        socketUser.username = data.username
+                        userQueue.push(socketUser);
                         io.emit('queue_chat', {
                             'userQueue': userQueue.length,
                             'helperQueue': helperQueue.length
@@ -118,8 +135,10 @@ module.exports.listen = (app, opt) => {
                     break;
                 case "helper":
                     if (userQueue.length != 0) {
-                        let matcher = userQueue.shift(); //ดึง sokcet ออกมาจาก array
-                        let room = socket.id + '#' + matcher.id;
+                        let matcher = userQueue.find(x => x.topic === data.topic)                        
+                        // let matcher = userQueue.shift(); //ดึง sokcet ออกมาจาก array
+                        let room = `#${data.topic}${socket.id}${matcher.id}`;
+                        // let room = socket.id + '#' + matcher.id;
 
                         matcher.join(room);
                         socket.join(room);
@@ -128,7 +147,7 @@ module.exports.listen = (app, opt) => {
 
                         chatRoom.push({
                             helperName: helperName,
-                            helperID:socket.id ,
+                            helperID: socket.id,
                             userName: userName,
                             userID: matcher.id,
                             room: room
@@ -137,12 +156,14 @@ module.exports.listen = (app, opt) => {
                         matcher.emit('found_chat', {
                             matchName: helperName,
                             yourName: userName,
-                            room: room
+                            room: room,
+                            topic:data.topic
                         });
                         socket.emit('found_chat', {
                             matchName: userName,
                             yourName: helperName,
-                            room: room
+                            room: room,
+                            topic:data.topic
                         });
                         io.emit('queue_chat', {
                             'userQueue': userQueue.length,
@@ -152,7 +173,10 @@ module.exports.listen = (app, opt) => {
                         console.log("helper:" + helperQueue.length)
                         console.log("user:" + userQueue.length)
                     } else {
-                        helperQueue.push(socket);
+                        let socketUser = socket
+                        socketUser.topic = data.topic
+                        socketUser.username = data.username
+                        helperQueue.push(socketUser);
                         io.emit('queue_chat', {
                             'userQueue': userQueue.length,
                             'helperQueue': helperQueue.length
