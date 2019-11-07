@@ -77,11 +77,22 @@ async function update(id, userParam) {
     await user.save();
 }
 
+async function updateMood(username,topic, mood) {
+    const user = await User.findOne({
+        username
+    }).select('-hash')
+    if (!user) throw 'User not found';
+    user["stat"][topic][mood] += 1
+    user.modified = new Date();
+    await user.save();
+}
+
 
 module.exports = {
     authenticate,
     getAll,
     getByUsername,
     create,
-    update
+    update,
+    updateMood
 };

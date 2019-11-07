@@ -22,12 +22,12 @@ const nameOfUser = [
     'น้องจู๋'
 ]
 
-const findStat = async (username,matchername, topic) => {
+const findStat = async (username, matchername, topic) => {
     let userData = await userService.getByUsername(username)
     let matcherData = await userService.getByUsername(matchername)
     return {
-        userStat:userData["stat"][topic],
-        matcherStat:matcherData["stat"][topic]
+        userStat: userData["stat"][topic],
+        matcherStat: matcherData["stat"][topic]
     }
 }
 
@@ -105,7 +105,7 @@ module.exports.listen = (app, opt) => {
                             room: room
                         })
 
-                        findStat(data.username,matcher.username,data.topic).then(dataStat=>{
+                        findStat(data.username, matcher.username, data.topic).then(dataStat => {
                             matcher.emit('found_chat', {
                                 matchName: userPName,
                                 yourName: helperPName,
@@ -121,7 +121,7 @@ module.exports.listen = (app, opt) => {
                                 matcherStat: dataStat.matcherStat
                             });
                         })
-                        
+
                         io.emit('queue_chat', {
                             'userQueue': userQueue.length,
                             'helperQueue': helperQueue.length
@@ -163,7 +163,7 @@ module.exports.listen = (app, opt) => {
                             room: room
                         })
 
-                        findStat(data.username,matcher.username,data.topic).then(dataStat=>{
+                        findStat(data.username, matcher.username, data.topic).then(dataStat => {
                             matcher.emit('found_chat', {
                                 matchName: helperPName,
                                 yourName: userPName,
@@ -179,7 +179,7 @@ module.exports.listen = (app, opt) => {
                                 matcherStat: dataStat.matcherStat
                             });
                         })
-                        
+
                         io.emit('queue_chat', {
                             'userQueue': userQueue.length,
                             'helperQueue': helperQueue.length
@@ -208,6 +208,8 @@ module.exports.listen = (app, opt) => {
 
         socket.on('send_chat', (data) => {
             console.log("message:" + data.text + " room:" + data.room);
+            data.text.length % 2 == 0 ? data.mood = "pos" : data.mood = "neg"
+            userService.updateMood(data.username,data.topic,data.mood)
             socket.to(data.room).emit('receive_chat', data);
         });
     })
