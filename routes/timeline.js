@@ -39,12 +39,19 @@ router.get('/all', JWTAuthMiddleware.adminAuth, (req, res, next) => {
 });
 
 router.post('/', JWTAuthMiddleware.userAuth, (req, res, next) => {
+    let iconType = ["cat", "dog", "elephant", "penguin", "tiger"]
+    let randIcon = Math.floor(Math.random() * 5)
+    let hexString = (0x1000000+(Math.random())*0xffffff).toString(16).substr(1,6)
     //
     //  ขาดทำ Predict แล้ว save ลง DB
     //    
     timelineService.create({
         text: req.body.text,
-        createdBy: req.body.username
+        createdBy: req.body.username,
+        icon: {
+            iconType: iconType[randIcon],
+            iconColor: `#${hexString}`,
+        }
     }).then(() => {
         req.app.io.emit('timeline', {
             message: "got a new status"

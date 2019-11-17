@@ -9,6 +9,10 @@ const schema = new Schema({
     mood:{
         type: String
     },
+    icon:{
+        iconType: String,
+        iconColor: String
+    },
     createdBy: {
         type: String
     },
