@@ -80,6 +80,9 @@ typings/
 # nuxt.js build output
 .nuxt
 
+# voice upload folder
+voice/
+
 # react / gatsby 
 public/
 

@@ -20,17 +20,35 @@ const schema = new Schema({
         default: "user"
     },
     stat: {
-        loveStat: {
-            pos: Number,
-            neg: Number
+        love: {
+            pos: {
+                type: Number,
+                default: 0
+            },
+            neg:  {
+                type: Number,
+                default: 0
+            }
         },
-        eduStat: {
-            pos: Number,
-            neg: Number
+        education: {
+            pos:  {
+                type: Number,
+                default: 0
+            },
+            neg:  {
+                type: Number,
+                default: 0
+            }
         },
-        genStat: {
-            pos: Number,
-            neg: Number
+        general: {
+            pos:  {
+                type: Number,
+                default: 0
+            },
+            neg:  {
+                type: Number,
+                default: 0
+            }
         },
     },
     createdDate: {

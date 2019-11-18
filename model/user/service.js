@@ -11,6 +11,7 @@ const authenticate = async ({
     const user = await User.findOne({
         username
     });
+    //valid
     if (user && bcrypt.compareSync(password, user.hash)) {
         let role = user.role
         const payload = {
@@ -20,9 +21,6 @@ const authenticate = async ({
         };
 
         let token = jwt.sign(payload, config.secret)
-        console.log(token);
-        
-
         return {
             username,
             role,
@@ -46,16 +44,13 @@ async function create(userParam) {
     if (await User.findOne({
             username: userParam.username
         })) {
-        throw 'Username "' + userParam.username + '" is already taken';
+        throw `Username ${userParam.username} is already taken`;
     }
-
     const user = new User(userParam);
-
     // hash password
     if (userParam.password) {
         user.hash = bcrypt.hashSync(userParam.password, 10);
     }
-
     // save user
     await user.save();
 }
@@ -82,11 +77,22 @@ async function update(id, userParam) {
     await user.save();
 }
 
+async function updateMood(username,topic, mood) {
+    const user = await User.findOne({
+        username
+    }).select('-hash')
+    if (!user) throw 'User not found';
+    user["stat"][topic][mood] += 1
+    user.modified = new Date();
+    await user.save();
+}
+
 
 module.exports = {
     authenticate,
     getAll,
     getByUsername,
     create,
-    update
+    update,
+    updateMood
 };

@@ -5,5 +5,6 @@ mongoose.connect(process.env.MONGODB_URI || config.connectionString, { useCreate
 mongoose.Promise = global.Promise;
 
 module.exports = {
-    User: require('../model/user/model.js')
+    User: require('../model/user/model.js'),
+    Timeline: require('../model/timeline/model.js')
 };

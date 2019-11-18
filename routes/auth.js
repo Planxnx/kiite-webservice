@@ -35,8 +35,8 @@ router.post('/login', (req, res, next) => {
       });
     }
 
-  }).catch(err => {    
-    return res.status(401).json({
+  }).catch(err => {
+    res.status(401).json({
       status: 401,
       message: err
     });
@@ -58,7 +58,7 @@ router.post('/register', (req, res, next) => {
       message: "register success"
     });
   }).catch(err => {
-    return res.status(401).json({
+    res.status(401).json({
       status: 401,
       message: err
     });
@@ -67,7 +67,7 @@ router.post('/register', (req, res, next) => {
 
 });
 
-router.get('/test',JWTAuthMiddleware.userAuth, (req, res, next) => {
+router.get('/test', JWTAuthMiddleware.userAuth, (req, res, next) => {
   res.json({
     status: 200,
     message: "Auth Success"
@@ -75,11 +75,16 @@ router.get('/test',JWTAuthMiddleware.userAuth, (req, res, next) => {
 });
 
 router.get('/user', JWTAuthMiddleware.adminAuth, (req, res, next) => {
-  userService.getAll().then((data)=>{
+  userService.getAll().then((data) => {
     res.json({
       status: 200,
-      message: "Auth Success",
+      message: "success",
       data: data
+    });
+  }).catch(err => {
+    res.status(401).json({
+      status: 401,
+      message: err
     });
   })
 });
