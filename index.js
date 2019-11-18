@@ -3,6 +3,7 @@ const app = express()
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const config = require('./config.json')
+var cors = require('cors')
 var http = require('http').Server(app);
 const io = require('./socket').listen(http,{
     origins: '*:*'
@@ -18,6 +19,7 @@ const port = process.env.PORT || config.PORT || 8080;
 
 app.use(express.json());
 app.use(logger('dev'));
+app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: false
