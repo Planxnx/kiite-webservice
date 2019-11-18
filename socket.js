@@ -36,7 +36,7 @@ const getRandomInt = (max) => {
 }
 
 const findMatcher = () => {
-    //...//
+    //. เอาโค้ดที่ซ้ำกันมาใส่ฟังชั่น .//
 }
 
 module.exports.listen = (app, opt) => {
