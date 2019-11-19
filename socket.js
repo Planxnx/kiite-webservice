@@ -1,5 +1,7 @@
 const socketio = require('socket.io')
 const userService = require('./model/user/service')
+const http = require('http');
+const { URL } = require('url');
 
 let helperQueue = []
 let userQueue = []
@@ -204,10 +206,28 @@ module.exports.listen = (app, opt) => {
         })
 
         socket.on('send_chat', (data) => {
+            const topic = data.topic
+            const topicCapitalized = topic.charAt(0).toUpperCase() + topic.slice(1)
             console.log("message:" + data.text + " room:" + data.room);
-            data.text.length % 2 == 0 ? data.mood = "pos" : data.mood = "neg"
-            userService.updateMood(data.username,data.topic,data.mood)
-            socket.to(data.room).emit('receive_chat', data);
+            const myURL = new URL(`/${topicCapitalized}?text=${data.text}`, 'http://13.229.79.95:5000/')
+            http.get(myURL, (resp) => {
+                const { statusCode } = resp;
+                console.log(statusCode)
+                resp.setEncoding('utf8');
+                let rawData = '';
+                resp.on('data', (chunk) => { rawData += chunk; });
+                resp.on('end', () => {
+                    try {
+                        const parsedData = JSON.parse(rawData);
+                        console.log(parsedData.data.mood)
+                        data.mood = parsedData.data.mood
+                        userService.updateMood(data.username,data.topic,data.mood)
+                        socket.to(data.room).emit('receive_chat', data); 
+                    } catch (e) {
+                        console.error(e.message);
+                    }
+                })
+            }) 
         });
     })
 
