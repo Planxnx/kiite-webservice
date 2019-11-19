@@ -5,21 +5,12 @@ let helperQueue = []
 let userQueue = []
 let chatRoom = []
 
-const nameOfHelper = [
-    'คุณเสือ',
-    'คุณหมี',
-    'คุณควาย',
-    'คุณนก',
-    'คุณเพ้น',
-    'คุณหี'
-]
-const nameOfUser = [
-    'น้องสิงโต',
-    'น้องช้าง',
-    'น้องม้า',
-    'น้องเหี้ย',
-    'น้องเพ้น',
-    'น้องจู๋'
+const userType = [
+    'tiger',
+    'pig',
+    'cat',
+    'penguin',
+    'dog'
 ]
 
 const findStat = async (username, matchername, topic) => {
@@ -94,8 +85,11 @@ module.exports.listen = (app, opt) => {
                         matcher.join(room);
                         socket.join(room);
 
-                        let userPName = nameOfUser[getRandomInt(nameOfUser.length)]
-                        let helperPName = nameOfHelper[getRandomInt(nameOfHelper.length)]
+                        let userPName = userType[getRandomInt(userType.length)]
+                        let helperPName = userType[getRandomInt(userType.length)]
+                        while (userPName == helperPName) {
+                            helperPName = userType[getRandomInt(userType.length)]
+                        }
 
                         chatRoom.push({
                             helperName: helperPName,
@@ -152,8 +146,11 @@ module.exports.listen = (app, opt) => {
 
                         matcher.join(room);
                         socket.join(room);
-                        let userPName = nameOfUser[getRandomInt(nameOfUser.length)]
-                        let helperPName = nameOfHelper[getRandomInt(nameOfHelper.length)]
+                        let userPName = userType[getRandomInt(userType.length)]
+                        let helperPName = userType[getRandomInt(userType.length)]
+                        while (userPName == helperPName) {
+                            helperPName = userType[getRandomInt(userType.length)]
+                        }
 
                         chatRoom.push({
                             helperName: helperPName,
