@@ -205,29 +205,44 @@ module.exports.listen = (app, opt) => {
             }
         })
 
-        socket.on('send_chat', (data) => {
-            const topic = data.topic
+        const getPredicted = (topic,text,callback) => {
             const topicCapitalized = topic.charAt(0).toUpperCase() + topic.slice(1)
-            console.log("message:" + data.text + " room:" + data.room);
-            const myURL = new URL(`/${topicCapitalized}?text=${data.text}`, 'http://13.229.79.95:5000/')
+            const myURL = new URL(`/${topicCapitalized}?text=${text}`, 'http://13.229.79.95:5000/')
             http.get(myURL, (resp) => {
-                const { statusCode } = resp;
-                console.log(statusCode)
                 resp.setEncoding('utf8');
                 let rawData = '';
                 resp.on('data', (chunk) => { rawData += chunk; });
                 resp.on('end', () => {
                     try {
                         const parsedData = JSON.parse(rawData);
-                        console.log(parsedData.data.mood)
-                        data.mood = parsedData.data.mood
-                        userService.updateMood(data.username,data.topic,data.mood)
-                        socket.to(data.room).emit('receive_chat', data); 
+                        callback(text,parsedData.data.mood)
                     } catch (e) {
                         console.error(e.message);
                     }
                 })
-            }) 
+            })
+        }
+
+        socket.on('send_chat',(data) => {
+            let predictCount = 1
+            let texts = data.text
+            var textSplit = texts.split(" ");
+            textSplit.forEach((text,index)=>{
+                getPredicted(data.topic,text,(txt,mood)=>{
+                    if(mood == 'pos'){
+                        predictCount += 1
+                    } else if (mood == 'neg'){
+                        predictCount -= 1
+                    }
+                    userService.updateMood(data.username,data.topic,mood)
+                    if(index+1 == textSplit.length){
+                        if (predictCount > 0) data.mood = 'pos'
+                        else data.mood = 'neg'
+                        console.log("message:" + data.text +" mood:"+data.mood+" room:" + data.room);
+                        socket.to(data.room).emit('receive_chat', data); 
+                    }
+                })
+            })
         });
     })
 
