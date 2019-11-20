@@ -82,7 +82,7 @@ module.exports.listen = (app, opt) => {
                         let matcher = helperQueue.find(x => x.topic === data.topic)
                         let index = helperQueue.indexOf(matcher)
                         helperQueue.splice(index, 1)
-                        let room = `#${data.topic}${socket.id}${matcher.id}`;
+                        let room = `${data.topic}${socket.id}${matcher.id}`;
 
                         matcher.join(room);
                         socket.join(room);
@@ -143,7 +143,7 @@ module.exports.listen = (app, opt) => {
                         let matcher = userQueue.find(x => x.topic === data.topic)
                         let index = userQueue.indexOf(matcher)
                         userQueue.splice(index, 1)
-                        let room = `#${data.topic}${socket.id}${matcher.id}`;
+                        let room = `${data.topic}${socket.id}${matcher.id}`;
                         // let room = socket.id + '#' + matcher.id;
 
                         matcher.join(room);
