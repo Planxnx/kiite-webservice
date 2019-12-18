@@ -3,7 +3,7 @@ const app = express()
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const config = require('./config.json')
-var cors = require('cors')
+const cors = require('cors')
 var http = require('http').Server(app);
 const io = require('./socket').listen(http,{
     origins: '*:*'

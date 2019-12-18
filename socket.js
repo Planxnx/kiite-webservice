@@ -1,25 +1,18 @@
 const socketio = require('socket.io')
 const userService = require('./model/user/service')
+const http = require('http');
+const { URL } = require('url');
 
 let helperQueue = []
 let userQueue = []
 let chatRoom = []
 
-const nameOfHelper = [
-    'คุณเสือ',
-    'คุณหมี',
-    'คุณควาย',
-    'คุณนก',
-    'คุณเพ้น',
-    'คุณหี'
-]
-const nameOfUser = [
-    'น้องสิงโต',
-    'น้องช้าง',
-    'น้องม้า',
-    'น้องเหี้ย',
-    'น้องเพ้น',
-    'น้องจู๋'
+const userType = [
+    'tiger',
+    'pig',
+    'cat',
+    'penguin',
+    'dog'
 ]
 
 const findStat = async (username, matchername, topic) => {
@@ -89,13 +82,16 @@ module.exports.listen = (app, opt) => {
                         let matcher = helperQueue.find(x => x.topic === data.topic)
                         let index = helperQueue.indexOf(matcher)
                         helperQueue.splice(index, 1)
-                        let room = `#${data.topic}${socket.id}${matcher.id}`;
+                        let room = `${data.topic}${socket.id}${matcher.id}`;
 
                         matcher.join(room);
                         socket.join(room);
 
-                        let userPName = nameOfUser[getRandomInt(nameOfUser.length)]
-                        let helperPName = nameOfHelper[getRandomInt(nameOfHelper.length)]
+                        let userPName = userType[getRandomInt(userType.length)]
+                        let helperPName = userType[getRandomInt(userType.length)]
+                        while (userPName == helperPName) {
+                            helperPName = userType[getRandomInt(userType.length)]
+                        }
 
                         chatRoom.push({
                             helperName: helperPName,
@@ -147,13 +143,16 @@ module.exports.listen = (app, opt) => {
                         let matcher = userQueue.find(x => x.topic === data.topic)
                         let index = userQueue.indexOf(matcher)
                         userQueue.splice(index, 1)
-                        let room = `#${data.topic}${socket.id}${matcher.id}`;
+                        let room = `${data.topic}${socket.id}${matcher.id}`;
                         // let room = socket.id + '#' + matcher.id;
 
                         matcher.join(room);
                         socket.join(room);
-                        let userPName = nameOfUser[getRandomInt(nameOfUser.length)]
-                        let helperPName = nameOfHelper[getRandomInt(nameOfHelper.length)]
+                        let userPName = userType[getRandomInt(userType.length)]
+                        let helperPName = userType[getRandomInt(userType.length)]
+                        while (userPName == helperPName) {
+                            helperPName = userType[getRandomInt(userType.length)]
+                        }
 
                         chatRoom.push({
                             helperName: helperPName,
@@ -206,11 +205,44 @@ module.exports.listen = (app, opt) => {
             }
         })
 
-        socket.on('send_chat', (data) => {
-            console.log("message:" + data.text + " room:" + data.room);
-            data.text.length % 2 == 0 ? data.mood = "pos" : data.mood = "neg"
-            userService.updateMood(data.username,data.topic,data.mood)
-            socket.to(data.room).emit('receive_chat', data);
+        const getPredicted = (topic,text,callback) => {
+            const topicCapitalized = topic.charAt(0).toUpperCase() + topic.slice(1)
+            const myURL = new URL(`/${topicCapitalized}?text=${text}`, 'http://13.229.79.95:5000/')
+            http.get(myURL, (resp) => {
+                resp.setEncoding('utf8');
+                let rawData = '';
+                resp.on('data', (chunk) => { rawData += chunk; });
+                resp.on('end', () => {
+                    try {
+                        const parsedData = JSON.parse(rawData);
+                        callback(text,parsedData.data.mood)
+                    } catch (e) {
+                        console.error(e.message);
+                    }
+                })
+            })
+        }
+
+        socket.on('send_chat',(data) => {
+            let predictCount = 1
+            let texts = data.text
+            var textSplit = texts.split(" ");
+            textSplit.forEach((text,index)=>{
+                getPredicted(data.topic,text,(txt,mood)=>{
+                    if(mood == 'pos'){
+                        predictCount += 1
+                    } else if (mood == 'neg'){
+                        predictCount -= 1
+                    }
+                    userService.updateMood(data.username,data.topic,mood)
+                    if(index+1 == textSplit.length){
+                        if (predictCount > 0) data.mood = 'pos'
+                        else data.mood = 'neg'
+                        console.log("message:" + data.text +" mood:"+data.mood+" room:" + data.room);
+                        socket.to(data.room).emit('receive_chat', data); 
+                    }
+                })
+            })
         });
     })
 

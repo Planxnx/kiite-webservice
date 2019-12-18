@@ -1,5 +1,6 @@
 {
-    "connectionString": "mongodb+srv://admin:[PASSWORDofPLANX]@kiite-mongo-sa7r0.gcp.mongodb.net/kiite?retryWrites=true&w=majority",
+    "connectionString": "mongodb+srv://admin:planxplanx@kiite-mongo-sa7r0.gcp.mongodb.net/kiite?retryWrites=true&w=majority",
     "secret": "PLANX-NON-BIRD-MIN-KAT",
-    "PORT": 8080
+    "PORT": 8080,
+    "sentimentApi": "http://13.229.79.95:5000"
 }
