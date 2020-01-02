@@ -207,7 +207,7 @@ module.exports.listen = (app, opt) => {
 
         const getPredicted = (topic,text,callback) => {
             const topicCapitalized = topic.charAt(0).toUpperCase() + topic.slice(1)
-            const myURL = new URL(`/${topicCapitalized}?text=${text}`, 'http://13.229.79.95:5000/')
+            const myURL = new URL(`/${topicCapitalized}?text=${text}`, 'http://13.229.79.959:5000/')
             http.get(myURL, (resp) => {
                 resp.setEncoding('utf8');
                 let rawData = '';
