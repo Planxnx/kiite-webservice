@@ -206,38 +206,21 @@ module.exports.listen = (app, opt) => {
         })
 
         const getPredicted = (topic,text,callback) => {
-            const topicCapitalized = topic.charAt(0).toUpperCase() + topic.slice(1)
-            const myURL = new URL(`/${topicCapitalized}?text=${text}`, 'http://13.229.79.95:5000/')
-            http.get(myURL, (resp) => {
-                resp.setEncoding('utf8');
-                let rawData = '';
-                resp.on('data', (chunk) => { rawData += chunk; });
-                resp.on('end', () => {
-                    try {
-                        const parsedData = JSON.parse(rawData);
-                        callback(text,parsedData.data.mood)
-                    } catch (e) {
-                        console.error(e.message);
-                    }
-                })
-            })
+            callback(text,undefined)
         }
 
         socket.on('send_chat',(data) => {
-            let predictCount = 1
             let texts = data.text
             var textSplit = texts.split(" ");
             textSplit.forEach((text,index)=>{
                 getPredicted(data.topic,text,(txt,mood)=>{
-                    if(mood == 'pos'){
-                        predictCount += 1
-                    } else if (mood == 'neg'){
-                        predictCount -= 1
-                    }
                     userService.updateMood(data.username,data.topic,mood)
                     if(index+1 == textSplit.length){
-                        if (predictCount > 0) data.mood = 'pos'
-                        else data.mood = 'neg'
+                        if(mood == 'pos'){
+                            data.mood = 'pos'
+                        } else if (mood == 'neg'){
+                            data.mood = 'neg'
+                        } else data.mood = mood
                         console.log("message:" + data.text +" mood:"+data.mood+" room:" + data.room);
                         socket.to(data.room).emit('receive_chat', data); 
                     }
