@@ -218,6 +218,7 @@ module.exports.listen = (app, opt) => {
                         callback(text,parsedData.data.mood)
                     } catch (e) {
                         console.error(e.message);
+                        callback(text,undefined)
                     }
                 })
             })
@@ -233,11 +234,14 @@ module.exports.listen = (app, opt) => {
                         predictCount += 1
                     } else if (mood == 'neg'){
                         predictCount -= 1
+                    } else {
+                        predictCount = null
                     }
                     userService.updateMood(data.username,data.topic,mood)
                     if(index+1 == textSplit.length){
                         if (predictCount > 0) data.mood = 'pos'
-                        else data.mood = 'neg'
+                        else if (predictCount <= 0) data.mood = 'neg'
+                        else data.mood == undefined
                         console.log("message:" + data.text +" mood:"+data.mood+" room:" + data.room);
                         socket.to(data.room).emit('receive_chat', data); 
                     }
