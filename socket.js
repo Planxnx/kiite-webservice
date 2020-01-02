@@ -207,7 +207,7 @@ module.exports.listen = (app, opt) => {
 
         const getPredicted = (topic,text,callback) => {
             const topicCapitalized = topic.charAt(0).toUpperCase() + topic.slice(1)
-            const myURL = new URL(`/${topicCapitalized}?text=${text}`, 'http://13.229.79.959:5000/')
+            const myURL = new URL(`/${topicCapitalized}?text=${text}`, 'http://13.229.79.95:5000/')
             http.get(myURL, (resp) => {
                 resp.setEncoding('utf8');
                 let rawData = '';
@@ -218,7 +218,6 @@ module.exports.listen = (app, opt) => {
                         callback(text,parsedData.data.mood)
                     } catch (e) {
                         console.error(e.message);
-                        callback(text,undefined)
                     }
                 })
             })
@@ -234,14 +233,11 @@ module.exports.listen = (app, opt) => {
                         predictCount += 1
                     } else if (mood == 'neg'){
                         predictCount -= 1
-                    } else {
-                        predictCount = null
                     }
                     userService.updateMood(data.username,data.topic,mood)
                     if(index+1 == textSplit.length){
                         if (predictCount > 0) data.mood = 'pos'
-                        else if (predictCount <= 0) data.mood = 'neg'
-                        else data.mood == undefined
+                        else data.mood = 'neg'
                         console.log("message:" + data.text +" mood:"+data.mood+" room:" + data.room);
                         socket.to(data.room).emit('receive_chat', data); 
                     }
